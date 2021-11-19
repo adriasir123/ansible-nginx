@@ -1,0 +1,20 @@
+#########################
+# VirtualHosts a activar#
+#########################
+
+virtualhosts_on:
+  - name: vhost1
+    datos:
+      nameserver: www.foo1.com
+      documentroot: /var/www/foo1
+  - name: vhost2
+    datos:
+      nameserver: www.foo2.com
+      documentroot: /var/www/foo2
+
+############################
+# VirtualHosts a desactivar#
+############################
+
+virtualhosts_off:
+  - name: vhost2

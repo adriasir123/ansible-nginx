@@ -1,0 +1,52 @@
+- name: Instalando Nginx...
+  apt:
+    name: nginx
+
+- name: Creando VirtualHosts...
+  template: 
+    src: etc/nginx/sites-available/vhost.j2
+    dest: "/etc/nginx/sites-available/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: u+rw,g+r,o+r
+  with_items:
+    - "{{ virtualhosts_on }}"
+  notify: reiniciar nginx
+
+- name: Activando VirtualHosts...
+  file:
+    src: "/etc/nginx/sites-available/{{ item.name }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item.name }}.conf"
+    state: link
+    mode: u+rwx,g+rwx,o+rwx
+  with_items:
+    - "{{ virtualhosts_on }}"
+  notify: reiniciar nginx
+
+- name: Desactivando VirtualHosts...
+  file:
+    path: "/etc/nginx/sites-enabled/{{ item.name }}.conf"
+    state: absent
+  with_items:
+    - "{{ virtualhosts_off }}"
+  notify: reiniciar nginx
+
+- name: Creando Document Roots...
+  file:
+    path: "{{ item.datos.documentroot }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: u+rwx,g+rx,o+rx
+  with_items:
+    - "{{ virtualhosts_on }}"
+
+- name: Copiando index.html en cada Document Root...
+  copy:
+    src: "index_{{ item.name }}.html"
+    dest: "{{ item.datos.documentroot }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: u+rw,g+r,o+r
+  with_items:
+    - "{{ virtualhosts_on }}"
